@@ -77,7 +77,7 @@ public class IabHelper {
 
     // Can we skip the online purchase verification?
     // (Only allowed if the app is debuggable)
-	private boolean mSkipPurchaseVerification = false;
+    private boolean mSkipPurchaseVerification = false;
 
     // Is setup done?
     boolean mSetupDone = false;
@@ -483,9 +483,14 @@ public class IabHelper {
             try {
                 purchase = new Purchase(mPurchasingItemType, purchaseData, dataSignature);
                 String sku = purchase.getSku();
-                // Only allow purchase verification to be skipped if we are debuggable
-                boolean skipPurchaseVerification = (this.mSkipPurchaseVerification  &&
-                            ((mContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0));
+                boolean productIsTest = sku.indexOf("android.test.") == 0;
+                if (productIsTest) {
+                    purchase = new Purchase(mPurchasingItemType, purchaseData, "-");
+                }
+                // Only allow purchase verification to be skipped if we are debuggable or the product is a static test
+                boolean skipPurchaseVerification = ((this.mSkipPurchaseVerification  &&
+                            ((mContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0)) ||
+                            (productIsTest));
                 // Verify signature
                 if (!skipPurchaseVerification) {
                     if (!Security.verifyPurchase(mSignatureBase64, purchaseData, dataSignature)) {
@@ -882,7 +887,11 @@ public class IabHelper {
                 String purchaseData = purchaseDataList.get(i);
                 String signature = signatureList.get(i);
                 String sku = ownedSkus.get(i);
-                if (skipPurchaseVerification || Security.verifyPurchase(mSignatureBase64, purchaseData, signature)) {
+                boolean productIsTest = sku.indexOf("android.test.") == 0;
+                if (productIsTest) {
+                    signature = "-"; // Not blank
+                }
+                if (productIsTest || skipPurchaseVerification || Security.verifyPurchase(mSignatureBase64, purchaseData, signature)) {
                     logDebug("Sku is owned: " + sku);
                     Purchase purchase = new Purchase(itemType, purchaseData, signature);
 
