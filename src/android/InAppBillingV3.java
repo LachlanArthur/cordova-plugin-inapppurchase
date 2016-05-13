@@ -324,7 +324,7 @@ public class InAppBillingV3 extends CordovaPlugin {
     iabHelper.queryInventoryAsync(true, moreSkus, new IabHelper.QueryInventoryFinishedListener() {
       public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
         if (result.isFailure()) {
-          callbackContext.error("Error retrieving SKU details");
+          callbackContext.error(makeError("Error retrieving SKU details", UNKNOWN_ERROR, result));
           return;
         }
         JSONArray response = new JSONArray();
@@ -357,7 +357,7 @@ public class InAppBillingV3 extends CordovaPlugin {
       iabHelper.queryInventoryAsync(new IabHelper.QueryInventoryFinishedListener() {
         public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
           if (result.isFailure()) {
-            callbackContext.error("Error retrieving purchase details");
+            callbackContext.error(makeError("Error retrieving purchase details", UNKNOWN_ERROR, result));
             return;
           }
           JSONArray response = new JSONArray();
